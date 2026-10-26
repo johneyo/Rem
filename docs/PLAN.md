@@ -134,6 +134,74 @@ back to level 1 and asks you. It never skips silently.
 - **Everything doable in ≤ 2 taps** from a notification: *Approve*, *Edit*, *Skip*.
 - Good empty states, sensible defaults, no setup required per person.
 
+### 3.10 Collecting birthdays and other details
+Birthday first, from least effort to most:
+
+| # | Source | How |
+|---|---|---|
+| 1 | Existing contacts | Birthday/anniversary fields from Google People API, Microsoft Graph, vCard `BDAY` / `X-ANNIVERSARY`, phone contacts (`expo-contacts`) |
+| 2 | Calendar | Parse events like "Ada's bday" from Google/Outlook calendars; AI matches them to contacts and the user confirms each match |
+| 3 | Quick fill | Card-by-card date picker for the user's most important people (day + month is enough); "Don't know" moves the person to the "Ask them" queue |
+| 4 | "Ask them" link | The person fills in their own birthday (and optionally anniversary, address, preferences, wishlist); the page records their browser timezone and language |
+| 5 | Group link | One link posted in a WhatsApp group; replies are matched to contacts by normalized phone number / email |
+| 6 | Paste anything | Text or screenshot; AI pulls out name + date pairs for the user to confirm |
+| 7 | Capture during the year | Forward an email, share a message, or type "Ada's birthday is Friday" |
+
+Who to ask about first: favourite/starred contacts, family labels, how often the user messages
+them (opt-in), and the user's own picks (target: 10-30 to start).
+
+**Everything else is collected only when a plan needs it:** timezone (phone country code, address,
+then the "Ask them" link), language, relationship/Circle (labels or a one-tap tag),
+anniversaries (asked when two people are linked as a couple), address (about 3 weeks before a
+planned physical gift, often never needed because recipient-picks-address gifts exist),
+interests (from notes, the "Ask them" page and reactions to past gifts).
+
+Each person has a **completeness score** listing what is missing for their upcoming plans. About
+14 days before a moment, missing required data triggers a nudge to the user or an automatic
+"Ask them" link; if the data is still missing on the day, the action falls back to a reminder.
+
+Data model additions:
+```
+AskLink(id, userId, personId?, groupMode bool, token UNIQUE, fields[], expiresAt, openedAt, submittedAt)
+FieldSource(personId, field, source(import|calendar|user|ask_link|ai_parse|discovery), confidence, confirmedAt)
+```
+Confirmed data always beats inferred data; matching across sources uses E.164 phone + lowercase email.
+
+### 3.11 Life-event discovery (online)
+Social platforms do not let apps read friends' posts, and scraping them breaks their terms, so
+discovery uses only legitimate sources and always produces **suggestions the user confirms**.
+
+| # | Source | Finds | Phase |
+|---|---|---|---|
+| 1 | Platform notification emails in the user's inbox (opt-in, read-only) | LinkedIn new-role / work-anniversary alerts, Facebook birthday reminders, invites | 2 |
+| 2 | Share to Rem (share sheet, link, screenshot) | Engagements, babies, graduations, moves seen on social media | 2 |
+| 3 | Public web/news search API (Brave, Exa, Tavily, SerpAPI…) | Promotions, new jobs, awards, public announcements | 5 |
+| 4 | LinkedIn `Connections.csv` export, compared with the previous upload | Job changes | 5 |
+| 5 | Public wedding / baby registries | Upcoming weddings and births, with a registry gift | 5 |
+| 6 | The person's own links on the "Ask them" page | Wishlists, public profiles | 2 |
+| 7 | Other Rem users sharing their own news with their circle | Anything they choose to share | Later |
+| 8 | Enrichment APIs (People Data Labs, Apollo) | Client job changes, Business mode only | Later |
+
+Pipeline:
+1. "Watch for news" is opt-in per person or Circle (off for personal contacts by default, on for
+   clients in Business mode).
+2. Build searches that find the right person: name + company + city + title.
+3. A weekly job runs the searches and inbox parsing within a cost cap per user.
+4. The AI gives each result an event type, a date, and two confidence scores: whether it is really this person, and whether it is really an event. Low scores are discarded.
+5. The user sees a card: *"Possibly: Ada Obi promoted to VP at Acme · source · Confirm / Not her / Ignore"*.
+6. Confirmed events create an occasion and a draft. Events found online always run at autopilot level 1.
+7. "Not her" answers are remembered, so the same wrong result is never suggested again.
+
+Guardrails: no scraping behind logins; only event + date + source URL stored; unconfirmed
+results deleted after 30 days; sensitive events (obituaries, illness, layoffs, breakups) are
+reminders only; GDPR/CCPA applies to public data about non-users (opt-in, minimal, deletable;
+Business mode needs a legal review).
+
+```
+Discovery(id, userId, personId, source, url, eventType, eventDate, personConfidence,
+          eventConfidence, status(pending|confirmed|rejected|expired), createdAt)
+```
+
 ---
 
 ## 4. Technical architecture (JavaScript / TypeScript)
@@ -276,7 +344,8 @@ AuditLog(id, userId, entity, entityId, event, data, createdAt)
 - [ ] SMS + WhatsApp through Twilio, delivery webhooks, opt-out handling
 - [ ] Send email as the user through the Gmail / Microsoft Graph APIs
 - [ ] E-cards (hosted card page with message, photo and animation)
-- [ ] "Ask them" link (birthday, address, preferences)
+- [ ] "Ask them" link (birthday, address, preferences) + group link
+- [ ] Life-event discovery: inbox notification parsing + Share to Rem
 - [ ] Holidays & cultural dates per Circle
 
 ### Phase 3: Gifts (weeks 10-14)
@@ -295,6 +364,7 @@ AuditLog(id, userId, entity, entityId, event, data, createdAt)
 - [ ] "Your voice" style learning, voice/video messages
 - [ ] Referral loop: every e-card has a subtle "Sent with Rem"
 - [ ] Business mode (clients/employees)
+- [ ] Discovery: public web search, LinkedIn CSV diff, registries
 
 ---
 
