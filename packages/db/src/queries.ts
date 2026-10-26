@@ -10,7 +10,7 @@ import {
   yearsSince,
   type ImportedContact,
 } from "@rem/core";
-import { and, asc, eq, gte, inArray } from "drizzle-orm";
+import { and, asc, eq, gte, inArray, sql } from "drizzle-orm";
 import type { CountryCode } from "libphonenumber-js";
 import type { Db } from "./client.js";
 import { toRecurrence } from "./mappers.js";
@@ -168,4 +168,60 @@ export async function listPeople(db: Db, userId: string) {
     ? await db.select().from(occasions).where(inArray(occasions.personId, ps.map((p) => p.id)))
     : [];
   return ps.map((p) => ({ ...p, occasions: occ.filter((o) => o.personId === p.id) }));
+}
+
+export interface DueReminder {
+  reminderId: string;
+  userEmail: string;
+  userName: string;
+  personName: string;
+  occasionType: OccasionType;
+  occursOn: string;
+}
+
+/**
+ * Atomically claim reminders that are due, so two workers never send the same one.
+ * The caller sends them and calls `releaseReminder` for any that failed.
+ */
+export async function claimDueReminders(db: Db, now = new Date(), limit = 100): Promise<DueReminder[]> {
+  const res = await db.execute<{
+    reminder_id: string;
+    user_email: string;
+    user_name: string;
+    person_name: string;
+    occasion_type: OccasionType;
+    occurs_on: string;
+  }>(sql`
+    with due as (
+      select id from ${reminders}
+      where ${reminders.status} = 'pending' and ${reminders.sendAt} <= ${now}
+      order by ${reminders.sendAt}
+      limit ${limit}
+      for update skip locked
+    ), claimed as (
+      update ${reminders} set status = 'sent' from due where ${reminders.id} = due.id
+      returning ${reminders.id} as id, ${reminders.momentId} as moment_id
+    )
+    select claimed.id as reminder_id, u.email as user_email, u.name as user_name,
+           coalesce(p.nickname, p.display_name) as person_name, o.type as occasion_type,
+           to_char(m.occurs_on, 'YYYY-MM-DD') as occurs_on
+    from claimed
+    join ${moments} m on m.id = claimed.moment_id
+    join ${occasions} o on o.id = m.occasion_id
+    join ${people} p on p.id = o.person_id
+    join ${users} u on u.id = p.user_id
+    where m.status = 'upcoming'
+  `);
+  return res.rows.map((r) => ({
+    reminderId: r.reminder_id,
+    userEmail: r.user_email,
+    userName: r.user_name,
+    personName: r.person_name,
+    occasionType: r.occasion_type,
+    occursOn: r.occurs_on,
+  }));
+}
+
+export async function releaseReminder(db: Db, reminderId: string) {
+  await db.update(reminders).set({ status: "pending" }).where(eq(reminders.id, reminderId));
 }

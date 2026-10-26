@@ -2,7 +2,7 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { sql } from "drizzle-orm";
 import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { createDb, importContacts, listUpcoming, runPlanner, users } from "../src/index.js";
+import { claimDueReminders, createDb, importContacts, listUpcoming, releaseReminder, runPlanner, users } from "../src/index.js";
 
 const url = process.env.TEST_DATABASE_URL;
 
@@ -42,5 +42,16 @@ describe.skipIf(!url)("queries (integration)", () => {
       ["Ada Obi", "2027-03-14", 13, 40, true],
       ["Tunde", "2027-03-20", 19, null, false],
     ]);
+  });
+
+  it("claims each due reminder once", async () => {
+    // Ada's message reminder is on the day itself, 14 Mar at 08:00 London time.
+    expect(await claimDueReminders(db, new Date("2027-03-14T07:59:00Z"))).toEqual([]);
+    const due = await claimDueReminders(db, new Date("2027-03-14T08:00:00Z"));
+    expect(due.map((d) => [d.personName, d.occasionType, d.occursOn])).toEqual([["Ada Obi", "birthday", "2027-03-14"]]);
+    expect(await claimDueReminders(db, new Date("2027-03-14T08:00:00Z"))).toEqual([]);
+
+    await releaseReminder(db, due[0]!.reminderId);
+    expect(await claimDueReminders(db, new Date("2027-03-14T08:00:00Z"))).toHaveLength(1);
   });
 });

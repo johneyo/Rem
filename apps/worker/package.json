@@ -1,0 +1,22 @@
+{
+  "name": "@rem/worker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@rem/core": "workspace:*",
+    "@rem/db": "workspace:*",
+    "drizzle-orm": "0.45.4",
+    "pg-boss": "12.38.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3"
+  }
+}
