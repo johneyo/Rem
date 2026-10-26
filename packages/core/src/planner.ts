@@ -1,5 +1,5 @@
-import { addDays, compareDates, nextOccurrence, type PlainDate, type Recurrence } from "./dates.js";
-import { reminderAt, todayIn, type ActionKind } from "./schedule.js";
+import { addDays, compareDates, nextOccurrence, type PlainDate, type Recurrence } from "./dates";
+import { reminderAt, todayIn, type ActionKind } from "./schedule";
 
 export interface PlannerOccasion {
   id: string;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { actionSendAt, planMoments, reminderAt, todayIn, zonedInstant } from "../src/index.js";
+import { actionSendAt, planMoments, reminderAt, todayIn, zonedInstant } from "../src/index";
 
 describe("timezones", () => {
   it("today depends on where the recipient lives", () => {

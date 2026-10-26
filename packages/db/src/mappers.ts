@@ -1,5 +1,5 @@
 import type { Recurrence } from "@rem/core";
-import type { occasions } from "./schema.js";
+import type { occasions } from "./schema";
 
 type OccasionRow = Pick<typeof occasions.$inferSelect, "recurrence" | "month" | "day" | "year" | "feb29Rule">;
 

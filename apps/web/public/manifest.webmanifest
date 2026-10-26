@@ -1,0 +1,10 @@
+{
+  "name": "Rem",
+  "short_name": "Rem",
+  "description": "Remember the people who matter, automatically.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fdfaf6",
+  "theme_color": "#e2553f",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

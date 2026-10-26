@@ -1,6 +1,6 @@
 import { claimDueReminders, createDb, releaseReminder, runPlanner } from "@rem/db";
 import { PgBoss } from "pg-boss";
-import { consoleNotifier, type Notifier } from "./notifier.js";
+import { consoleNotifier, type Notifier } from "./notifier";
 
 const url = process.env.DATABASE_URL ?? "postgres://rem:rem@localhost:5432/rem";
 const db = createDb(url);

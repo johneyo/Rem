@@ -1,5 +1,5 @@
-import { parsePartialDate } from "./partial-date.js";
-import type { ImportedContact } from "./types.js";
+import { parsePartialDate } from "./partial-date";
+import type { ImportedContact } from "./types";
 
 /** RFC 4180 CSV parser: quoted fields, escaped quotes, newlines inside quotes. */
 export function parseCsv(text: string): string[][] {

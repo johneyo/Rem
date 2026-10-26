@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { matchKeys, normalizePhone, parseContactsCsv, parsePartialDate, parseVCards } from "../src/index.js";
+import { matchKeys, normalizePhone, parseContactsCsv, parsePartialDate, parseVCards } from "../src/index";
 
 describe("parsePartialDate", () => {
   it.each([

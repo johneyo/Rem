@@ -1,4 +1,4 @@
-import type { ActionKind } from "./schedule.js";
+import type { ActionKind } from "./schedule";
 
 export type Channel = "email" | "sms" | "whatsapp" | "one_tap";
 

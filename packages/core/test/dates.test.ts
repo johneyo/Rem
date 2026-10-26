@@ -7,7 +7,7 @@ import {
   yearlyDateIn,
   yearsSince,
   type PlainDate,
-} from "../src/index.js";
+} from "../src/index";
 
 const d = (year: number, month: number, day: number): PlainDate => ({ year, month, day });
 

@@ -1,4 +1,4 @@
-import type { ActionKind } from "./schedule.js";
+import type { ActionKind } from "./schedule";
 
 /** 0 remind me · 1 draft for me · 2 auto-send unless I stop it · 3 full autopilot. */
 export type AutopilotLevel = 0 | 1 | 2 | 3;

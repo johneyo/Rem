@@ -12,9 +12,9 @@ import {
 } from "@rem/core";
 import { and, asc, eq, gte, inArray, sql } from "drizzle-orm";
 import type { CountryCode } from "libphonenumber-js";
-import type { Db } from "./client.js";
-import { toRecurrence } from "./mappers.js";
-import { circles, moments, occasions, people, personCircles, reminders, users } from "./schema.js";
+import type { Db } from "./client";
+import { toRecurrence } from "./mappers";
+import { circles, moments, occasions, people, personCircles, reminders, users } from "./schema";
 
 export type OccasionType = (typeof occasions.$inferInsert)["type"];
 
@@ -22,13 +22,14 @@ export type OccasionType = (typeof occasions.$inferInsert)["type"];
  * Create moments and reminders for everything coming up within the horizon.
  * Safe to run any number of times: unique idempotency keys turn repeats into no-ops.
  */
-export async function runPlanner(db: Db, opts: { now?: Date; horizonDays?: number } = {}) {
+export async function runPlanner(db: Db, opts: { now?: Date; horizonDays?: number; userId?: string } = {}) {
   const now = opts.now ?? new Date();
   const rows = await db
     .select({ occasion: occasions, personTz: people.timezone, userTz: users.timezone, userId: users.id })
     .from(occasions)
     .innerJoin(people, eq(occasions.personId, people.id))
-    .innerJoin(users, eq(people.userId, users.id));
+    .innerJoin(users, eq(people.userId, users.id))
+    .where(opts.userId ? eq(users.id, opts.userId) : undefined);
 
   let created = 0;
   for (const r of rows) {
@@ -224,4 +225,51 @@ export async function claimDueReminders(db: Db, now = new Date(), limit = 100): 
 
 export async function releaseReminder(db: Db, reminderId: string) {
   await db.update(reminders).set({ status: "pending" }).where(eq(reminders.id, reminderId));
+}
+
+export async function addPerson(
+  db: Db,
+  userId: string,
+  input: {
+    displayName: string;
+    email?: string | null;
+    phone?: string | null;
+    birthday?: { month: number; day: number; year?: number | null } | null;
+  },
+) {
+  return db.transaction(async (tx) => {
+    const [person] = await tx
+      .insert(people)
+      .values({
+        userId,
+        displayName: input.displayName,
+        email: input.email ? normalizeEmail(input.email) : null,
+        phone: input.phone ? normalizePhone(input.phone) : null,
+      })
+      .returning();
+    if (input.birthday) {
+      const { month, day, year } = input.birthday;
+      await tx.insert(occasions).values({ personId: person!.id, type: "birthday", month, day, year: year ?? null });
+    }
+    return person!;
+  });
+}
+
+/** "Mark done": the user called them or gave a gift in person. Pending reminders are cancelled. */
+export async function markMomentDone(db: Db, userId: string, momentId: string) {
+  const [owned] = await db
+    .select({ id: moments.id })
+    .from(moments)
+    .innerJoin(occasions, eq(moments.occasionId, occasions.id))
+    .innerJoin(people, eq(occasions.personId, people.id))
+    .where(and(eq(moments.id, momentId), eq(people.userId, userId)));
+  if (!owned) return false;
+  await db.transaction(async (tx) => {
+    await tx.update(moments).set({ status: "done" }).where(eq(moments.id, momentId));
+    await tx
+      .update(reminders)
+      .set({ status: "cancelled" })
+      .where(and(eq(reminders.momentId, momentId), eq(reminders.status, "pending")));
+  });
+  return true;
 }

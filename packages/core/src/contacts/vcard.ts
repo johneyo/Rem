@@ -1,5 +1,5 @@
-import { parsePartialDate } from "./partial-date.js";
-import type { ImportedContact } from "./types.js";
+import { parsePartialDate } from "./partial-date";
+import type { ImportedContact } from "./types";
 
 /** Undo line folding (RFC 6350 §3.2): a line starting with a space or tab continues the previous one. */
 function unfold(text: string): string[] {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { completenessScore, decideMode, missingFields } from "../src/index.js";
+import { completenessScore, decideMode, missingFields } from "../src/index";
 
 describe("decideMode", () => {
   const base = { kind: "message", missing: [] } as const;

@@ -1,5 +1,5 @@
 import { TZDate } from "@date-fns/tz";
-import { addDays, type PlainDate } from "./dates.js";
+import { addDays, type PlainDate } from "./dates";
 
 export type ActionKind = "message" | "ecard" | "giftcard" | "gift" | "postcard";
 

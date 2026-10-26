@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
-import { createDb } from "./client.js";
-import { importContacts, runPlanner } from "./queries.js";
-import { users } from "./schema.js";
+import { createDb } from "./client";
+import { importContacts, runPlanner } from "./queries";
+import { users } from "./schema";
 
 /** Development data: one user and a few people with dates spread over the next weeks. */
 const db = createDb();

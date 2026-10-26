@@ -1,5 +1,5 @@
-import { daysInMonth } from "../dates.js";
-import type { PartialDate } from "./types.js";
+import { daysInMonth } from "../dates";
+import type { PartialDate } from "./types";
 
 function valid(year: number | undefined, month: number, day: number): PartialDate | undefined {
   if (month < 1 || month > 12 || day < 1) return undefined;

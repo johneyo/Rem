@@ -2,7 +2,7 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { sql } from "drizzle-orm";
 import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { claimDueReminders, createDb, importContacts, listUpcoming, releaseReminder, runPlanner, users } from "../src/index.js";
+import { claimDueReminders, createDb, importContacts, listUpcoming, releaseReminder, runPlanner, users } from "../src/index";
 
 const url = process.env.TEST_DATABASE_URL;
 
