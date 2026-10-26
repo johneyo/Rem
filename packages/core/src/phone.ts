@@ -1,9 +1,12 @@
 import { parsePhoneNumberFromString, type CountryCode } from "libphonenumber-js";
 
-/** Normalize a phone number to E.164 (+15551234567); null when it is not a valid number. */
+/**
+ * Normalize a phone number to E.164 (+15551234567); null when it cannot be a phone number.
+ * Uses "possible" rather than "valid" so numbers are not dropped when numbering metadata lags.
+ */
 export function normalizePhone(raw: string, defaultCountry?: CountryCode): string | null {
   const p = parsePhoneNumberFromString(raw.trim(), defaultCountry);
-  return p?.isValid() ? p.number : null;
+  return p?.isPossible() ? p.number : null;
 }
 
 export function normalizeEmail(raw: string): string | null {
