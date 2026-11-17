@@ -14,19 +14,6 @@ export const OCCASION_LABELS: Record<OccasionType, string> = {
   custom: "Special day",
 };
 
-export const OCCASION_EMOJI: Record<OccasionType, string> = {
-  birthday: "🎂",
-  wedding_anniversary: "💍",
-  dating_anniversary: "❤️",
-  work_anniversary: "💼",
-  graduation: "🎓",
-  new_baby: "👶",
-  new_job: "🚀",
-  retirement: "🌴",
-  housewarming: "🏡",
-  memorial: "🕯️",
-  custom: "✨",
-};
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -44,4 +31,18 @@ export function whenLabel(daysAway: number): string {
   if (daysAway === 0) return "Today";
   if (daysAway === 1) return "Tomorrow";
   return `In ${daysAway} days`;
+}
+
+const WEEKDAYS_LONG = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+/** Parts of a YYYY-MM-DD date for date blocks ("NOV" / "21" / "Friday"). */
+export function dateParts(isoDate: string) {
+  const [y, m, d] = isoDate.split("-").map(Number) as [number, number, number];
+  const weekday = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+  return { day: d, month: MONTHS[m - 1]!.toUpperCase(), weekdayLong: WEEKDAYS_LONG[weekday]! };
+}
+
+/** "Sunday 16 November" in the user's timezone. */
+export function longDateIn(timeZone: string, now = new Date()): string {
+  return new Intl.DateTimeFormat("en-GB", { timeZone, weekday: "long", day: "numeric", month: "long" }).format(now);
 }

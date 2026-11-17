@@ -1,27 +1,72 @@
 @import "tailwindcss";
 
+/*
+ * Rem design tokens. Calm is the base (structure, type, pine actions);
+ * Confetti colours appear only on celebration moments; the Fraunces serif
+ * is reserved for personal words (names on celebration cards, messages).
+ * See docs/DESIGN.md.
+ */
 @theme {
-  --color-brand: #e2553f;
-  --color-brand-dark: #b9402d;
-  --color-ink: #1f1b16;
-  --color-muted: #6b6259;
-  --color-paper: #fdfaf6;
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-fraunces), Georgia, serif;
+
+  --color-ground: #f5f6f2;
   --color-card: #ffffff;
-  --color-line: #ece4da;
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --color-ink: #17201c;
+  --color-body: #39443f;
+  --color-muted: #56625c;
+  --color-line: #e6eae6;
+  --color-subtle: #f0f1ec;
+
+  --color-pine: #1f4d3f;
+  --color-pine-hover: #163a2f;
+  --color-on-pine: #ffffff;
+  --color-pine-tint: #e3eae5;
+  --color-pine-ink: #1f4d3f;
+
+  --color-apricot-tint: #fce7d2;
+  --color-apricot-ink: #7a4413;
+  --color-sky-tint: #dce8f5;
+  --color-sky-ink: #234a72;
+  --color-coral-tint: #ffe4e0;
+  --color-coral-ink: #a3291a;
+  --color-sun-tint: #fff1c9;
+  --color-sun-ink: #6b4b00;
+
+  /* Celebration palette (Confetti): fixed in both themes. */
+  --color-coral: #f0533f;
+  --color-sunflower: #ffc83d;
+  --color-lilac: #cfc4ff;
+  --color-party-ink: #1e1b2e;
+  --color-party-paper: #fff8f1;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-ink: #f3ede6;
-    --color-muted: #a99e92;
-    --color-paper: #171411;
-    --color-card: #221e1a;
-    --color-line: #3a332c;
+    --color-ground: #111714;
+    --color-card: #1a221e;
+    --color-ink: #eef2ef;
+    --color-body: #c6d0ca;
+    --color-muted: #a3b0a9;
+    --color-line: #2a3530;
+    --color-subtle: #222b26;
+    --color-pine: #8fd3b8;
+    --color-pine-hover: #a9e0ca;
+    --color-on-pine: #0e1a15;
+    --color-pine-tint: #22332b;
+    --color-pine-ink: #a9e0ca;
+    --color-apricot-tint: #3a2a1a;
+    --color-apricot-ink: #f6c08c;
+    --color-sky-tint: #1d2a38;
+    --color-sky-ink: #a9c8ea;
+    --color-coral-tint: #3a1f1b;
+    --color-coral-ink: #ffb3a8;
+    --color-sun-tint: #382e12;
+    --color-sun-ink: #ffd877;
   }
 }
 
 body {
-  background: var(--color-paper);
+  background: var(--color-ground);
   color: var(--color-ink);
 }

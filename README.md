@@ -5,14 +5,15 @@
 Rem sends personalized messages and gifts to the people in your life on their birthdays,
 anniversaries and other life events, with reminders that come early enough to actually do something.
 
-- Plan: [docs/PLAN.md](docs/PLAN.md)
+- Plan: [docs/PLAN.md](docs/PLAN.md) · Design: [docs/DESIGN.md](docs/DESIGN.md)
 - Status: Phase 0 done, Phase 1 in progress (see "What works today")
 
 ## Repository layout
 
 | Path | What it is |
 |---|---|
-| `apps/web` | Next.js web app (installable PWA): Upcoming timeline, People, contact import |
+| `apps/web` | Next.js web app (installable PWA) and the JSON API (`/api/*`) the mobile app uses |
+| `apps/mobile` | Expo (React Native) app with a development build (`expo-dev-client`) |
 | `apps/worker` | Background worker (pg-boss): hourly planner, reminder sender |
 | `packages/core` | Pure domain logic: recurrence, 29 Feb rules, timezones, autopilot, contact parsing |
 | `packages/db` | Drizzle schema, migrations and queries |
@@ -31,6 +32,21 @@ pnpm db:seed                        # optional demo data
 pnpm --filter @rem/web dev          # http://localhost:3000
 pnpm --filter @rem/worker dev       # planner + reminders
 ```
+
+### Mobile app (Expo development build)
+
+The mobile app talks to the web app's API, so start that first (`pnpm web`, port 3000).
+
+1. **Build the development client once** (it is a real native app with Rem's native modules):
+   - Cloud: `cd apps/mobile && npx eas-cli login && pnpm build:dev:android` (or `build:dev:ios`;
+     iOS needs an Apple Developer account and your device registered with `eas device:create`).
+   - Local: `pnpm --filter @rem/mobile android` (Android Studio) or `pnpm --filter @rem/mobile ios` (Xcode, macOS).
+2. **Start Metro for the dev client:** `pnpm mobile`, then open the Rem dev app on your phone and pick the
+   server (same Wi-Fi), or scan the QR code.
+3. The app finds the API on the machine running Metro (port 3000). Set `EXPO_PUBLIC_API_URL` in
+   `apps/mobile/.env` to point elsewhere.
+
+`pnpm --filter @rem/mobile web` runs the same app in a browser, which is handy for quick checks.
 
 Tests: `pnpm test` (set `TEST_DATABASE_URL` to an empty database to include the DB integration tests),
 `pnpm typecheck`, `pnpm build`. After changing `packages/db/src/schema.ts`, run `pnpm db:generate`.

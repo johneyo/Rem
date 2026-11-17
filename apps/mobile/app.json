@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "Rem",
+    "slug": "rem",
+    "scheme": "rem",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#f5f6f2",
+    "ios": { "bundleIdentifier": "health.drdogood.rem", "supportsTablet": true },
+    "android": { "package": "health.drdogood.rem", "edgeToEdgeEnabled": true },
+    "web": { "bundler": "metro", "output": "single" },
+    "experiments": { "typedRoutes": true },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-status-bar",
+      "expo-dev-client",
+      ["expo-splash-screen", { "backgroundColor": "#1f4d3f" }]
+    ]
+  }
+}

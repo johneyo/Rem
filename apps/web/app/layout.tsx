@@ -1,6 +1,12 @@
 import type { Metadata, Viewport } from "next";
+import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
 import Link from "next/link";
+import { Logo } from "@/components/logo";
+import { SideNav, TabBar } from "@/components/nav";
 import "./globals.css";
+
+const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-jakarta", display: "swap" });
+const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces", display: "swap", style: ["normal", "italic"] });
 
 export const metadata: Metadata = {
   title: "Rem",
@@ -9,34 +15,29 @@ export const metadata: Metadata = {
   icons: { icon: "/icon.svg" },
 };
 
-export const viewport: Viewport = { themeColor: "#e2553f", width: "device-width", initialScale: 1 };
-
-const nav = [
-  { href: "/", label: "Upcoming" },
-  { href: "/people", label: "People" },
-  { href: "/import", label: "Import" },
-];
+export const viewport: Viewport = { themeColor: "#1f4d3f", width: "device-width", initialScale: 1 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${jakarta.variable} ${fraunces.variable}`}>
       <body className="min-h-dvh font-sans antialiased">
-        <header className="sticky top-0 z-10 border-b border-line bg-paper/90 backdrop-blur">
-          <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
-            <Link href="/" className="flex items-center gap-2 text-lg font-semibold">
-              <img src="/icon.svg" alt="" className="h-7 w-7" />
-              Rem
+        <div className="mx-auto flex max-w-6xl">
+          <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col gap-6 px-4 py-6 md:flex">
+            <Link href="/" className="px-3">
+              <Logo />
             </Link>
-            <nav className="flex gap-1 text-sm">
-              {nav.map((n) => (
-                <Link key={n.href} href={n.href} className="rounded-full px-3 py-1.5 text-muted hover:bg-line hover:text-ink">
-                  {n.label}
-                </Link>
-              ))}
-            </nav>
+            <SideNav />
+          </aside>
+          <div className="min-w-0 flex-1">
+            <header className="flex items-center justify-between px-4 pt-5 md:hidden">
+              <Link href="/">
+                <Logo />
+              </Link>
+            </header>
+            <main className="px-4 pt-5 pb-28 md:px-8 md:pt-8 md:pb-12">{children}</main>
           </div>
-        </header>
-        <main className="mx-auto max-w-2xl px-4 py-6">{children}</main>
+        </div>
+        <TabBar />
       </body>
     </html>
   );
